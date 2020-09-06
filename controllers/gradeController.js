@@ -1,8 +1,18 @@
 import { db } from '../models/index.js';
 import { logger } from '../config/logger.js';
+const Student = db.student;
 
 const create = async (req, res) => {
+  const student = new Student({
+    name: req.body.name,
+    subject: req.body.subject,
+    type: req.body.type,
+    value: req.body.value,
+    lastModified: new Date(),
+  });
+
   try {
+    const data = await student.save();
     res.send({ message: 'Grade inserido com sucesso' });
     logger.info(`POST /grade - ${JSON.stringify()}`);
   } catch (error) {
@@ -22,6 +32,8 @@ const findAll = async (req, res) => {
     : {};
 
   try {
+    const data = await Student.find();
+    res.send(data);
     logger.info(`GET /grade`);
   } catch (error) {
     res
@@ -35,6 +47,12 @@ const findOne = async (req, res) => {
   const id = req.params.id;
 
   try {
+    const data = await Student.findById({ _id: id });
+    if (!data) {
+      res.send('Nao encontrato o podcast id: ' + id);
+    } else {
+      res.send(data);
+    }
     logger.info(`GET /grade - ${id}`);
   } catch (error) {
     res.status(500).send({ message: 'Erro ao buscar o Grade id: ' + id });
@@ -52,6 +70,15 @@ const update = async (req, res) => {
   const id = req.params.id;
 
   try {
+    const data = await Student.findByIdAndUpdate({ _id: id }, req.body, {
+      new: true,
+    });
+
+    if (!data) {
+      res.send('Nao encontrato o estudante id: ' + id);
+    } else {
+      res.send(data);
+    }
     logger.info(`PUT /grade - ${id} - ${JSON.stringify(req.body)}`);
   } catch (error) {
     res.status(500).send({ message: 'Erro ao atualizar a Grade id: ' + id });
@@ -63,6 +90,14 @@ const remove = async (req, res) => {
   const id = req.params.id;
 
   try {
+    const data = await Student.findByIdAndRemove({ _id: id });
+
+    if (!data) {
+      res.send('Nao encontrado o estudante id: ' + id);
+    } else {
+      res.send('Estudante excluido com sucesso');
+    }
+
     logger.info(`DELETE /grade - ${id}`);
   } catch (error) {
     res
@@ -74,6 +109,7 @@ const remove = async (req, res) => {
 
 const removeAll = async (req, res) => {
   try {
+    const data = await Student.removeAll();
     logger.info(`DELETE /grade`);
   } catch (error) {
     res.status(500).send({ message: 'Erro ao excluir todos as Grades' });
